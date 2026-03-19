@@ -1,1 +1,280 @@
 @import 'tailwindcss';
+
+:root {
+  --bg: #faf6f3;
+  --bg-elevated: #fffdfa;
+  --surface: #fffaf7;
+  --surface-strong: #ffffff;
+  --border: #f4dfd2;
+  --text: #2f2925;
+  --text-soft: #806f66;
+  --brand: #eb8a5e;
+  --brand-strong: #de7c4a;
+  --brand-soft: #fff0e6;
+  --success: #1f8f66;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 0% 0%, #fff1e8 0%, transparent 33%),
+    radial-gradient(circle at 100% 100%, #ffe3d2 0%, transparent 26%), var(--bg);
+  font-family: var(--font-body), 'Segoe UI', sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.ambient {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(34px);
+  opacity: 0.4;
+}
+
+.ambient-top {
+  width: 20rem;
+  height: 20rem;
+  top: -6rem;
+  right: -6rem;
+  background: #ffd4bc;
+}
+
+.ambient-bottom {
+  width: 16rem;
+  height: 16rem;
+  left: -4rem;
+  bottom: 1rem;
+  background: #ffc6a4;
+}
+
+.site-header,
+.site-footer {
+  position: relative;
+  z-index: 10;
+}
+
+.site-header {
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-strong) 84%, transparent);
+  backdrop-filter: blur(7px);
+}
+
+.site-header-inner,
+.site-footer-inner {
+  margin: 0 auto;
+  width: min(1120px, calc(100% - 2rem));
+}
+
+.site-header-inner {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.brand-mark {
+  font-family: var(--font-display), Georgia, serif;
+  letter-spacing: 0.09em;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--brand-strong);
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+}
+
+.site-nav a {
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  transition: background-color 0.22s ease;
+}
+
+.site-nav a:hover {
+  background: var(--brand-soft);
+}
+
+.site-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.user-chip {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.65rem;
+}
+
+.user-chip-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.user-chip-role {
+  font-size: 0.73rem;
+  color: var(--brand-strong);
+  text-transform: capitalize;
+}
+
+.page-shell {
+  position: relative;
+  z-index: 5;
+  width: min(1120px, calc(100% - 2rem));
+  margin: 1.5rem auto 2rem;
+  flex: 1;
+}
+
+.site-footer {
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+}
+
+.site-footer-inner {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: var(--text-soft);
+  font-size: 0.83rem;
+}
+
+.btn {
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  padding: 0.6rem 0.95rem;
+  font-weight: 700;
+  font-size: 0.82rem;
+  transition: background-color 0.18s ease;
+}
+
+.btn-primary {
+  background: var(--brand);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--brand-strong);
+}
+
+.btn-ghost {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.btn-ghost:hover {
+  background: #fff3ec;
+}
+
+.surface {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface-strong);
+  box-shadow: 0 12px 28px rgba(70, 45, 22, 0.045);
+}
+
+.card-title {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.1rem;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 0.28rem;
+  font-size: 0.74rem;
+  color: var(--text-soft);
+  font-weight: 700;
+}
+
+.field,
+.select,
+.textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fffefd;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.88rem;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.field:focus,
+.select:focus,
+.textarea:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px #ffd8c3;
+}
+
+.muted {
+  color: var(--text-soft);
+}
+
+.status-ok {
+  color: var(--success);
+}
+
+@media (max-width: 950px) {
+  .site-nav {
+    display: none;
+  }
+
+  .site-header-inner {
+    flex-wrap: wrap;
+    padding: 0.75rem 0;
+    min-height: unset;
+  }
+
+  .site-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .site-footer-inner {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    padding: 0.8rem 0;
+  }
+}

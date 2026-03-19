@@ -77,3 +77,4 @@ Thumbs.db
 # DB
 /drizzle
 sqlite.db
+temp_seed_local_db.cjs

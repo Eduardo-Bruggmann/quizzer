@@ -19,13 +19,44 @@ interface Alternative {
   isCorrect: boolean
 }
 
+interface CurrentUser {
+  id: string
+  fullName: string
+  email: string
+  role: 'student' | 'teacher'
+}
+
+function getStoredUser(): CurrentUser | null {
+  if (typeof window === 'undefined') return null
+
+  const stored = localStorage.getItem('currentUser')
+  if (!stored) return null
+
+  try {
+    return JSON.parse(stored) as CurrentUser
+  } catch {
+    return null
+  }
+}
+
 export default function StudyPage() {
   const router = useRouter()
+  const [user] = useState<CurrentUser | null>(() => getStoredUser())
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>('')
   const [questions, setQuestions] = useState<Question[]>([])
-  const [selectedQuestionId, setSelectedQuestionId] = useState<string>('')
+  const [activeQuestionIndex, setActiveQuestionIndex] = useState(0)
   const [alternatives, setAlternatives] = useState<Alternative[]>([])
+  const [selectedAlternativeId, setSelectedAlternativeId] = useState<string>('')
+  const [correctAnswers, setCorrectAnswers] = useState(0)
+  const [loadingQuiz, setLoadingQuiz] = useState(false)
+  const [finished, setFinished] = useState(false)
+
+  useEffect(() => {
+    if (!user) {
+      router.replace('/login')
+    }
+  }, [router, user])
 
   useEffect(() => {
     async function loadSubjects() {
@@ -38,96 +69,221 @@ export default function StudyPage() {
   }, [])
 
   useEffect(() => {
-    async function loadQuestions() {
-      if (!selectedSubjectId) return
-
-      const res = await fetch(`/api/questions?subjectId=${selectedSubjectId}`)
-      const data = await res.json()
-      setQuestions(data.data ?? [])
-      setSelectedQuestionId('')
+    if (!selectedSubjectId) {
+      setQuestions([])
       setAlternatives([])
+      setActiveQuestionIndex(0)
+      setSelectedAlternativeId('')
+      setCorrectAnswers(0)
+      setFinished(false)
+      return
     }
 
-    loadQuestions()
+    let cancelled = false
+
+    async function loadQuiz() {
+      setLoadingQuiz(true)
+      setFinished(false)
+      setCorrectAnswers(0)
+      setSelectedAlternativeId('')
+      setActiveQuestionIndex(0)
+
+      try {
+        const questionsRes = await fetch(
+          `/api/questions?subjectId=${selectedSubjectId}`,
+        )
+        const questionsData = await questionsRes.json()
+        const loadedQuestions = (questionsData.data ?? []) as Question[]
+
+        if (cancelled) return
+        setQuestions(loadedQuestions)
+
+        if (loadedQuestions.length > 0) {
+          const firstQuestionId = loadedQuestions[0].id
+          const alternativesRes = await fetch(
+            `/api/alternatives?questionId=${firstQuestionId}`,
+          )
+          const alternativesData = await alternativesRes.json()
+
+          if (!cancelled) {
+            setAlternatives(alternativesData.data ?? [])
+          }
+        } else {
+          setAlternatives([])
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingQuiz(false)
+        }
+      }
+    }
+
+    loadQuiz()
+
+    return () => {
+      cancelled = true
+    }
   }, [selectedSubjectId])
 
-  useEffect(() => {
-    async function loadAlternatives() {
-      if (!selectedQuestionId) return
+  const activeQuestion = questions[activeQuestionIndex]
 
-      const res = await fetch(
-        `/api/alternatives?questionId=${selectedQuestionId}`,
-      )
-      const data = await res.json()
-      setAlternatives(data.data ?? [])
+  async function goNext() {
+    if (!activeQuestion) return
+
+    const selected = alternatives.find(
+      item => item.id === selectedAlternativeId,
+    )
+    if (selected?.isCorrect) {
+      setCorrectAnswers(value => value + 1)
     }
 
-    loadAlternatives()
-  }, [selectedQuestionId])
+    const nextIndex = activeQuestionIndex + 1
+    if (nextIndex >= questions.length) {
+      setFinished(true)
+      setAlternatives([])
+      return
+    }
+
+    setActiveQuestionIndex(nextIndex)
+    setSelectedAlternativeId('')
+
+    const nextQuestion = questions[nextIndex]
+    const alternativesRes = await fetch(
+      `/api/alternatives?questionId=${nextQuestion.id}`,
+    )
+    const alternativesData = await alternativesRes.json()
+    setAlternatives(alternativesData.data ?? [])
+  }
+
+  async function restartCurrentSubject() {
+    if (!selectedSubjectId) return
+
+    setFinished(false)
+    setCorrectAnswers(0)
+    setActiveQuestionIndex(0)
+    setSelectedAlternativeId('')
+
+    if (!questions.length) return
+
+    const alternativesRes = await fetch(
+      `/api/alternatives?questionId=${questions[0].id}`,
+    )
+    const alternativesData = await alternativesRes.json()
+    setAlternatives(alternativesData.data ?? [])
+  }
+
+  if (!user) return null
+
+  const progress = questions.length
+    ? Math.round((activeQuestionIndex / questions.length) * 100)
+    : 0
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-4 p-6">
-      <button
-        className="self-start text-xs text-gray-600 underline"
-        onClick={() => router.push('/dashboard')}
-      >
-        Voltar para o dashboard
-      </button>
+    <section className="space-y-6 py-6">
+      <header className="surface space-y-3 p-5 md:p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#E97635]">
+          Study Session
+        </p>
+        <h1 className="card-title text-3xl">Practice and Improve</h1>
+        <p className="text-sm muted">
+          Select a subject, answer each question, and keep your accuracy high.
+        </p>
+      </header>
 
-      <h1 className="text-2xl font-semibold">Estudos</h1>
-
-      <section className="space-y-3 rounded border p-4 text-sm">
-        <div className="space-y-1">
-          <label className="block text-xs font-medium">Matéria</label>
-          <select
-            className="w-full rounded border p-2 text-sm"
-            value={selectedSubjectId}
-            onChange={e => setSelectedSubjectId(e.target.value)}
-          >
-            <option value="">Selecione uma matéria</option>
-            {subjects.map(subject => (
-              <option key={subject.id} value={subject.id}>
-                {subject.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="space-y-1">
-          <label className="block text-xs font-medium">Questão</label>
-          <select
-            className="w-full rounded border p-2 text-sm"
-            value={selectedQuestionId}
-            onChange={e => setSelectedQuestionId(e.target.value)}
-            disabled={!selectedSubjectId || questions.length === 0}
-          >
-            <option value="">Selecione uma questão</option>
-            {questions.map(question => (
-              <option key={question.id} value={question.id}>
-                {question.statement}
-              </option>
-            ))}
-          </select>
-        </div>
+      <section className="surface p-5 md:p-6">
+        <label className="field-label">Subject</label>
+        <select
+          className="select"
+          value={selectedSubjectId}
+          onChange={event => setSelectedSubjectId(event.target.value)}
+        >
+          <option value="">Choose a subject</option>
+          {subjects.map(subject => (
+            <option key={subject.id} value={subject.id}>
+              {subject.name}
+            </option>
+          ))}
+        </select>
       </section>
 
-      {selectedQuestionId ? (
-        <section className="space-y-3 rounded border p-4 text-sm">
-          <h2 className="text-base font-semibold">Alternativas</h2>
-          <ul className="space-y-2">
-            {alternatives.map(alt => (
-              <li key={alt.id} className="rounded border p-2">
-                {alt.content}
-              </li>
-            ))}
-            {alternatives.length === 0 ? (
-              <p className="text-xs text-gray-500">
-                Nenhuma alternativa cadastrada para esta questão.
-              </p>
-            ) : null}
-          </ul>
+      {loadingQuiz ? <p className="text-sm muted">Loading quiz...</p> : null}
+
+      {!loadingQuiz && selectedSubjectId && questions.length === 0 ? (
+        <section className="surface p-5 text-sm muted">
+          This subject has no questions yet.
         </section>
       ) : null}
-    </main>
+
+      {!loadingQuiz && activeQuestion && !finished ? (
+        <section className="surface space-y-4 p-5 md:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-semibold text-[#E97635]">
+              Question {activeQuestionIndex + 1} of {questions.length}
+            </p>
+            <p className="text-xs muted">Progress: {progress}%</p>
+          </div>
+
+          <h2 className="text-lg font-semibold text-[#2F2925]">
+            {activeQuestion.statement}
+          </h2>
+
+          <ul className="space-y-2">
+            {alternatives.map((alternative, index) => {
+              const label = String.fromCharCode(65 + index)
+
+              return (
+                <li key={alternative.id}>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedAlternativeId(alternative.id)}
+                    className={`w-full rounded-xl border px-3 py-2 text-left text-sm transition-colors ${
+                      selectedAlternativeId === alternative.id
+                        ? 'border-[#DE7C4A] bg-[#FFF3EB]'
+                        : 'border-[#F4DFD2] bg-[#FFFCFA]'
+                    }`}
+                  >
+                    <span className="mr-2 font-bold text-[#C67A52]">
+                      {label}.
+                    </span>
+                    {alternative.content}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+
+          <div className="flex justify-end">
+            <button
+              type="button"
+              className="btn btn-primary disabled:opacity-60"
+              onClick={goNext}
+              disabled={!selectedAlternativeId}
+            >
+              Next question
+            </button>
+          </div>
+        </section>
+      ) : null}
+
+      {finished ? (
+        <section className="surface space-y-3 p-6 text-center">
+          <h2 className="card-title text-2xl">Session Complete</h2>
+          <p className="text-sm muted">
+            You answered {correctAnswers} out of {questions.length} correctly.
+          </p>
+          <div className="flex flex-wrap justify-center gap-2">
+            <button className="btn btn-primary" onClick={restartCurrentSubject}>
+              Retry subject
+            </button>
+            <button
+              className="btn btn-ghost"
+              onClick={() => router.push('/dashboard')}
+            >
+              Back to dashboard
+            </button>
+          </div>
+        </section>
+      ) : null}
+    </section>
   )
 }

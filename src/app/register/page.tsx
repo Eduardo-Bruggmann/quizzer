@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -43,65 +44,81 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4">
-      <section className="w-full max-w-sm space-y-4 rounded border p-6">
-        <h1 className="text-xl font-semibold">Criar conta</h1>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="space-y-1">
-            <label className="block text-sm">Nome completo</label>
+    <section className="mx-auto w-full max-w-md py-8">
+      <div className="surface space-y-5 p-6 md:p-8">
+        <div>
+          <h1 className="card-title text-3xl">Create Your Account</h1>
+          <p className="mt-1 text-sm muted">
+            Start studying and track your progress.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-3.5">
+          <div>
+            <label className="field-label">Full name</label>
             <input
-              className="w-full rounded border p-2 text-sm"
+              className="field"
+              placeholder="Your full name"
               value={fullName}
               onChange={e => setFullName(e.target.value)}
               required
             />
           </div>
-          <div className="space-y-1">
-            <label className="block text-sm">Email</label>
+
+          <div>
+            <label className="field-label">Email</label>
             <input
-              className="w-full rounded border p-2 text-sm"
+              className="field"
               type="email"
+              placeholder="you@email.com"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
             />
           </div>
-          <div className="space-y-1">
-            <label className="block text-sm">Senha</label>
+
+          <div>
+            <label className="field-label">Password</label>
             <input
-              className="w-full rounded border p-2 text-sm"
+              className="field"
               type="password"
+              placeholder="Create a password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
             />
           </div>
-          <div className="space-y-1">
-            <label className="block text-sm">Confirmar senha</label>
+
+          <div>
+            <label className="field-label">Confirm password</label>
             <input
-              className="w-full rounded border p-2 text-sm"
+              className="field"
               type="password"
+              placeholder="Repeat your password"
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
               required
             />
           </div>
+
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
           <button
-            className="w-full rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+            className="btn btn-primary w-full disabled:opacity-60"
             type="submit"
             disabled={loading}
           >
-            {loading ? 'Criando...' : 'Criar conta'}
+            {loading ? 'Creating account...' : 'Create account'}
           </button>
         </form>
-        <p className="text-xs text-gray-600">
-          Já tem conta?{' '}
-          <a href="/login" className="underline">
-            Entrar
-          </a>
+
+        <p className="text-xs muted">
+          Already have an account?{' '}
+          <Link href="/login" className="font-semibold text-[#E97635]">
+            Sign in
+          </Link>
         </p>
-      </section>
-    </main>
+      </div>
+    </section>
   )
 }

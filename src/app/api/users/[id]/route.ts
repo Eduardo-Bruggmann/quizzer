@@ -41,9 +41,12 @@ export async function PATCH(
     await userService.updateUser(id, {
       fullName: body.fullName,
       email: body.email,
+      password: body.password,
     })
 
-    return NextResponse.json({ success: true })
+    const updatedUser = await userService.getUserById(id)
+
+    return NextResponse.json({ success: true, data: updatedUser })
   } catch (error) {
     const { status, message } = handleHttpError(error, 'Failed to update user')
 
@@ -56,13 +59,17 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    await requireAuth(req, { roles: ['teacher'] })
+    const auth = await requireAuth(req)
 
     const { id } = await params
 
+    if (auth.role !== 'teacher' && auth.sub !== id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     await userService.deleteUser(id)
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, signedOut: auth.sub === id })
   } catch (error) {
     const { status, message } = handleHttpError(error, 'Failed to delete user')
 

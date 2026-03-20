@@ -137,8 +137,17 @@ a {
 }
 
 .user-chip-name {
+  border: none;
+  background: transparent;
+  padding: 0;
   font-size: 0.8rem;
   font-weight: 700;
+  color: inherit;
+  cursor: pointer;
+}
+
+.user-chip-name:hover {
+  text-decoration: underline;
 }
 
 .user-chip-role {

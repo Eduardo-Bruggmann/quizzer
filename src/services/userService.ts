@@ -1,6 +1,8 @@
 import * as userRepository from '@/repositories/userRepository'
 import { User } from '@/types/user'
 import { parseUserRole, toSafeUser } from './utils'
+import { parseOrThrow } from './utils'
+import { emailSchema, strongPasswordSchema } from '@/schemas/authSchemas'
 import bcrypt from 'bcrypt'
 
 type RepositoryUser = Pick<User, 'id' | 'fullName' | 'email'> & {
@@ -42,12 +44,42 @@ export async function getAllUsers() {
 
 export async function updateUser(
   id: string,
-  userData: Partial<Pick<User, 'fullName' | 'email'>>,
+  userData: Partial<Pick<User, 'fullName' | 'email'>> & { password?: string },
 ) {
   const user = await userRepository.findUserById(id)
   if (!user) throw new Error('User not found')
 
-  const updatedUser: Partial<Pick<User, 'fullName' | 'email'>> = userData
+  const updatedUser: Partial<User> = {}
+
+  if (typeof userData.fullName === 'string') {
+    const fullName = userData.fullName.trim()
+
+    if (fullName.length < 3) {
+      throw new Error('Full name must contain at least 3 characters')
+    }
+
+    updatedUser.fullName = fullName
+  }
+
+  if (typeof userData.email === 'string') {
+    const parsedEmail = parseOrThrow(emailSchema, userData.email)
+
+    const existing = await userRepository.findUserByEmail(parsedEmail)
+    if (existing && existing.id !== id) {
+      throw new Error('Email is already in use')
+    }
+
+    updatedUser.email = parsedEmail
+  }
+
+  if (typeof userData.password === 'string' && userData.password.length > 0) {
+    const parsedPassword = parseOrThrow(strongPasswordSchema, userData.password)
+    updatedUser.passwordHash = await bcrypt.hash(parsedPassword, 10)
+  }
+
+  if (Object.keys(updatedUser).length === 0) {
+    throw new Error('No valid fields to update')
+  }
 
   return userRepository.updateUser(id, updatedUser)
 }

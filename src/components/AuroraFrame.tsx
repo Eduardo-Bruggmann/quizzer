@@ -69,7 +69,13 @@ export default function AuroraFrame({ children }: AuroraFrameProps) {
             {user ? (
               <>
                 <div className="user-chip">
-                  <span className="user-chip-name">{user.fullName}</span>
+                  <button
+                    type="button"
+                    className="user-chip-name"
+                    onClick={() => router.push('/profile')}
+                  >
+                    {user.fullName}
+                  </button>
                   <span className="user-chip-role">{user.role}</span>
                 </div>
                 <button className="btn btn-ghost" onClick={logout}>

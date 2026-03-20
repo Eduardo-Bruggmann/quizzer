@@ -1,5 +1,5 @@
 import { Question } from '@/types/question'
-import { questions } from '@/db/schema'
+import { alternatives, questions } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { db } from '@/db'
 
@@ -27,5 +27,6 @@ export async function updateQuestion(
 }
 
 export async function deleteQuestion(id: string) {
+  await db.delete(alternatives).where(eq(alternatives.questionId, id))
   await db.delete(questions).where(eq(questions.id, id))
 }

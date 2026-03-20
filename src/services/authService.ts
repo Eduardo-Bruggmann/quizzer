@@ -57,7 +57,7 @@ export async function registerUser(data: RegisterData) {
   }
 }
 
-// Alias para manter semântica de "signUp" se for útil em outros pontos
+// Alias kept for optional signUp naming across modules
 export const signUp = registerUser
 
 export async function forgotPassword(email: string, newPassword: string) {

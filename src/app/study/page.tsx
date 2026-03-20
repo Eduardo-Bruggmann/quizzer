@@ -177,6 +177,14 @@ export default function StudyPage() {
   const progress = questions.length
     ? Math.round((activeQuestionIndex / questions.length) * 100)
     : 0
+  const accuracy = questions.length ? correctAnswers / questions.length : 0
+
+  const completionMessage =
+    accuracy >= 0.8
+      ? 'Excellent work. You are consistently making strong decisions under pressure.'
+      : accuracy >= 0.5
+        ? 'Solid effort. Keep practicing and your score will climb quickly.'
+        : 'Bold strategy. At least now the wrong answers know your name.'
 
   return (
     <section className="space-y-6 py-6">
@@ -255,7 +263,7 @@ export default function StudyPage() {
           <div className="flex justify-end">
             <button
               type="button"
-              className="btn btn-primary disabled:opacity-60"
+              className="btn btn-primary w-full sm:w-auto disabled:opacity-60"
               onClick={goNext}
               disabled={!selectedAlternativeId}
             >
@@ -271,12 +279,18 @@ export default function StudyPage() {
           <p className="text-sm muted">
             You answered {correctAnswers} out of {questions.length} correctly.
           </p>
+          <p className="text-sm font-semibold text-[#2F2925]">
+            {completionMessage}
+          </p>
           <div className="flex flex-wrap justify-center gap-2">
-            <button className="btn btn-primary" onClick={restartCurrentSubject}>
+            <button
+              className="btn btn-primary w-full sm:w-auto"
+              onClick={restartCurrentSubject}
+            >
               Retry subject
             </button>
             <button
-              className="btn btn-ghost"
+              className="btn btn-ghost w-full sm:w-auto"
               onClick={() => router.push('/dashboard')}
             >
               Back to dashboard

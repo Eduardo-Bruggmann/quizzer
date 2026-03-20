@@ -38,22 +38,12 @@ export default function DashboardPage() {
   const [user, setUser] = useState<CurrentUser | null>(() => getStoredUser())
   const [subjects, setSubjects] = useState<SubjectWithCount[]>([])
   const [loadingSubjects, setLoadingSubjects] = useState(true)
-  const [profileFullName, setProfileFullName] = useState('')
-  const [profileEmail, setProfileEmail] = useState('')
-  const [profilePassword, setProfilePassword] = useState('')
-  const [profileConfirmPassword, setProfileConfirmPassword] = useState('')
-  const [profileLoading, setProfileLoading] = useState(false)
-  const [profileError, setProfileError] = useState<string | null>(null)
-  const [profileSuccess, setProfileSuccess] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) {
       router.replace('/login')
       return
     }
-
-    setProfileFullName(user.fullName)
-    setProfileEmail(user.email)
   }, [router, user])
 
   useEffect(() => {
@@ -113,90 +103,6 @@ export default function DashboardPage() {
     return null
   }
 
-  const token = localStorage.getItem('accessToken')
-
-  async function handleProfileUpdate(event: React.FormEvent) {
-    event.preventDefault()
-
-    if (!user) return
-
-    setProfileError(null)
-    setProfileSuccess(null)
-
-    if (profilePassword && profilePassword !== profileConfirmPassword) {
-      setProfileError('As senhas não coincidem.')
-      return
-    }
-
-    setProfileLoading(true)
-
-    try {
-      const res = await fetch(`/api/users/${user.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-        body: JSON.stringify({
-          fullName: profileFullName,
-          email: profileEmail,
-          password: profilePassword || undefined,
-        }),
-      })
-
-      const data = await res.json()
-      if (!res.ok) {
-        throw new Error(data.error ?? 'Não foi possível atualizar o perfil')
-      }
-
-      const updatedUser = data.data as CurrentUser
-      localStorage.setItem('currentUser', JSON.stringify(updatedUser))
-      setUser(updatedUser)
-      setProfilePassword('')
-      setProfileConfirmPassword('')
-      setProfileSuccess('Dados atualizados com sucesso.')
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : 'Não foi possível atualizar o perfil'
-      setProfileError(message)
-    } finally {
-      setProfileLoading(false)
-    }
-  }
-
-  async function handleDeleteOwnAccount() {
-    if (!user) return
-
-    if (!confirm('Tem certeza que deseja excluir sua conta?')) return
-
-    setProfileError(null)
-    setProfileSuccess(null)
-
-    try {
-      const res = await fetch(`/api/users/${user.id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-      })
-
-      const data = await res.json()
-      if (!res.ok) {
-        throw new Error(data.error ?? 'Não foi possível excluir a conta')
-      }
-
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('currentUser')
-      router.replace('/register')
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Não foi possível excluir a conta'
-      setProfileError(message)
-    }
-  }
-
   return (
     <section className="space-y-6 py-6">
       <header className="surface flex flex-col justify-between gap-4 p-5 md:flex-row md:items-center md:p-6">
@@ -210,21 +116,27 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex w-full flex-wrap gap-2 md:w-auto md:justify-end">
           <button
-            className="btn btn-primary"
+            className="btn btn-primary w-full sm:w-auto"
             onClick={() => router.push('/study')}
           >
             Start studying
           </button>
           {user.role === 'teacher' ? (
             <button
-              className="btn btn-ghost"
+              className="btn btn-ghost w-full sm:w-auto"
               onClick={() => router.push('/teacher')}
             >
               Open teacher panel
             </button>
           ) : null}
+          <button
+            className="btn btn-ghost w-full sm:w-auto"
+            onClick={() => router.push('/profile')}
+          >
+            Edit profile and password
+          </button>
         </div>
       </header>
 
@@ -267,74 +179,20 @@ export default function DashboardPage() {
       </section>
 
       <section className="surface p-5 md:p-6">
-        <h2 className="card-title text-2xl">Meu perfil</h2>
-        <p className="mt-1 text-sm muted">Atualize seu nome, email e senha.</p>
+        <h2 className="card-title text-2xl">Account Settings</h2>
+        <p className="mt-1 text-sm muted">
+          Personal data has moved to a dedicated profile page. Password updates
+          are in a separate section there.
+        </p>
 
-        <form className="mt-4 space-y-3" onSubmit={handleProfileUpdate}>
-          <div>
-            <label className="field-label">Nome completo</label>
-            <input
-              className="field"
-              value={profileFullName}
-              onChange={event => setProfileFullName(event.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="field-label">Email</label>
-            <input
-              className="field"
-              type="email"
-              value={profileEmail}
-              onChange={event => setProfileEmail(event.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="field-label">Nova senha (opcional)</label>
-            <input
-              className="field"
-              type="password"
-              value={profilePassword}
-              onChange={event => setProfilePassword(event.target.value)}
-              placeholder="Digite somente se quiser alterar"
-            />
-          </div>
-          <div>
-            <label className="field-label">Confirmar nova senha</label>
-            <input
-              className="field"
-              type="password"
-              value={profileConfirmPassword}
-              onChange={event => setProfileConfirmPassword(event.target.value)}
-              placeholder="Repita a nova senha"
-            />
-          </div>
-
-          {profileError ? (
-            <p className="text-sm text-red-600">{profileError}</p>
-          ) : null}
-          {profileSuccess ? (
-            <p className="status-ok text-sm">{profileSuccess}</p>
-          ) : null}
-
-          <div className="flex flex-wrap gap-2">
-            <button
-              className="btn btn-primary disabled:opacity-60"
-              type="submit"
-              disabled={profileLoading}
-            >
-              {profileLoading ? 'Salvando...' : 'Salvar alterações'}
-            </button>
-            <button
-              className="btn btn-ghost"
-              type="button"
-              onClick={handleDeleteOwnAccount}
-            >
-              Excluir minha conta
-            </button>
-          </div>
-        </form>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            className="btn btn-primary w-full sm:w-auto"
+            onClick={() => router.push('/profile')}
+          >
+            Open profile settings
+          </button>
+        </div>
       </section>
     </section>
   )

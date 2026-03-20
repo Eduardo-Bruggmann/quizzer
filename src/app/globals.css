@@ -265,19 +265,42 @@ a {
 }
 
 @media (max-width: 950px) {
-  .site-nav {
-    display: none;
-  }
-
   .site-header-inner {
     flex-wrap: wrap;
-    padding: 0.75rem 0;
+    padding: 0.85rem 0;
     min-height: unset;
+    gap: 0.7rem;
+  }
+
+  .brand-mark {
+    font-size: 1rem;
+  }
+
+  .site-nav {
+    order: 3;
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    gap: 0.4rem;
+    padding-bottom: 0.15rem;
+    scrollbar-width: thin;
+  }
+
+  .site-nav a {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 0.38rem 0.72rem;
   }
 
   .site-actions {
     width: 100%;
     justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .site-actions .btn {
+    flex: 1 1 145px;
   }
 
   .site-footer-inner {
@@ -285,5 +308,18 @@ a {
     justify-content: center;
     text-align: center;
     padding: 0.8rem 0;
+  }
+
+  .page-shell {
+    width: min(1120px, calc(100% - 1rem));
+    margin: 1rem auto 1.25rem;
+  }
+
+  .btn {
+    min-height: 40px;
+  }
+
+  .surface {
+    border-radius: 15px;
   }
 }

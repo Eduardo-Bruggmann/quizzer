@@ -107,7 +107,7 @@ export default function TeacherPage() {
 
     const data = await res.json()
     if (!res.ok) {
-      throw new Error(data.error ?? 'Falha ao carregar usuários')
+      throw new Error(data.error ?? 'Failed to load users')
     }
 
     setUsers(data.data ?? [])
@@ -122,7 +122,7 @@ export default function TeacherPage() {
     const res = await fetch(`/api/questions?subjectId=${subjectId}`)
     const data = await res.json()
     if (!res.ok) {
-      throw new Error(data.error ?? 'Falha ao carregar questões')
+      throw new Error(data.error ?? 'Failed to load questions')
     }
 
     setQuestions(data.data ?? [])
@@ -150,7 +150,7 @@ export default function TeacherPage() {
       } catch (err) {
         if (!cancelled) {
           const message =
-            err instanceof Error ? err.message : 'Falha ao carregar painel'
+            err instanceof Error ? err.message : 'Failed to load panel'
           setError(message)
         }
       }
@@ -171,7 +171,7 @@ export default function TeacherPage() {
 
     loadQuestions(manageSubjectId).catch(err => {
       const message =
-        err instanceof Error ? err.message : 'Falha ao carregar questões'
+        err instanceof Error ? err.message : 'Failed to load questions'
       setError(message)
     })
   }, [loadQuestions, manageSubjectId])
@@ -203,10 +203,10 @@ export default function TeacherPage() {
       await loadSubjects()
       setSubjectName('')
       setSubjectDescription('')
-      setSuccessMessage('Matéria criada com sucesso.')
+      setSuccessMessage('Subject created successfully.')
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Falha ao criar matéria'
+        err instanceof Error ? err.message : 'Failed to create subject'
       setError(message)
     }
   }
@@ -218,7 +218,7 @@ export default function TeacherPage() {
     const validAlternatives = alternatives.filter(item => item.content.trim())
 
     if (validAlternatives.length < 2) {
-      setError('Adicione ao menos duas alternativas.')
+      setError('Add at least two alternatives.')
       return
     }
 
@@ -266,7 +266,7 @@ export default function TeacherPage() {
       await loadQuestions(questionSubjectId)
       setManageSubjectId(questionSubjectId)
 
-      setSuccessMessage('Questão criada com sucesso.')
+      setSuccessMessage('Question created successfully.')
       setQuestionStatement('')
       setQuestionSubjectId('')
       setAlternatives([
@@ -279,7 +279,7 @@ export default function TeacherPage() {
       setCorrectLabel('A')
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Falha ao criar questão'
+        err instanceof Error ? err.message : 'Failed to create question'
       setError(message)
     }
   }
@@ -300,23 +300,23 @@ export default function TeacherPage() {
       })
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Falha ao atualizar papel')
+      if (!res.ok) throw new Error(data.error ?? 'Failed to update role')
 
       setUsers(previous =>
         previous.map(item =>
           item.id === target.id ? { ...item, role: nextRole } : item,
         ),
       )
-      setSuccessMessage('Perfil de acesso atualizado.')
+      setSuccessMessage('Access role updated successfully.')
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Falha ao atualizar papel'
+        err instanceof Error ? err.message : 'Failed to update role'
       setError(message)
     }
   }
 
   async function deleteUser(target: ManagedUser) {
-    if (!confirm(`Deseja remover o usuário ${target.fullName}?`)) return
+    if (!confirm(`Remove user ${target.fullName}?`)) return
 
     resetMessages()
 
@@ -329,13 +329,13 @@ export default function TeacherPage() {
       })
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Falha ao remover usuário')
+      if (!res.ok) throw new Error(data.error ?? 'Failed to remove user')
 
       setUsers(previous => previous.filter(item => item.id !== target.id))
-      setSuccessMessage('Usuário removido com sucesso.')
+      setSuccessMessage('User removed successfully.')
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Falha ao remover usuário'
+        err instanceof Error ? err.message : 'Failed to remove user'
       setError(message)
     }
   }
@@ -387,19 +387,19 @@ export default function TeacherPage() {
       })
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Falha ao editar matéria')
+      if (!res.ok) throw new Error(data.error ?? 'Failed to update subject')
 
       await loadSubjects()
-      setSuccessMessage('Matéria atualizada com sucesso.')
+      setSuccessMessage('Subject updated successfully.')
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Falha ao editar matéria'
+        err instanceof Error ? err.message : 'Failed to update subject'
       setError(message)
     }
   }
 
   async function removeSubject(subject: Subject) {
-    if (!confirm(`Deseja excluir a matéria ${subject.name}?`)) return
+    if (!confirm(`Delete subject ${subject.name}?`)) return
 
     resetMessages()
 
@@ -412,7 +412,7 @@ export default function TeacherPage() {
       })
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Falha ao excluir matéria')
+      if (!res.ok) throw new Error(data.error ?? 'Failed to delete subject')
 
       await loadSubjects()
 
@@ -421,10 +421,10 @@ export default function TeacherPage() {
         setManageSubjectId(next[0]?.id ?? '')
       }
 
-      setSuccessMessage('Matéria excluída com sucesso.')
+      setSuccessMessage('Subject deleted successfully.')
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Falha ao excluir matéria'
+        err instanceof Error ? err.message : 'Failed to delete subject'
       setError(message)
     }
   }
@@ -456,19 +456,19 @@ export default function TeacherPage() {
       })
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Falha ao editar questão')
+      if (!res.ok) throw new Error(data.error ?? 'Failed to update question')
 
       await loadQuestions(manageSubjectId)
-      setSuccessMessage('Questão atualizada com sucesso.')
+      setSuccessMessage('Question updated successfully.')
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Falha ao editar questão'
+        err instanceof Error ? err.message : 'Failed to update question'
       setError(message)
     }
   }
 
   async function removeQuestion(question: Question) {
-    if (!confirm('Deseja excluir esta questão?')) return
+    if (!confirm('Delete this question?')) return
 
     resetMessages()
 
@@ -481,13 +481,13 @@ export default function TeacherPage() {
       })
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Falha ao excluir questão')
+      if (!res.ok) throw new Error(data.error ?? 'Failed to delete question')
 
       await loadQuestions(manageSubjectId)
-      setSuccessMessage('Questão excluída com sucesso.')
+      setSuccessMessage('Question deleted successfully.')
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Falha ao excluir questão'
+        err instanceof Error ? err.message : 'Failed to delete question'
       setError(message)
     }
   }
@@ -504,10 +504,10 @@ export default function TeacherPage() {
     <section className="space-y-6 py-6">
       <header className="surface p-5 md:p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#E97635]">
-          Painel do Professor
+          Teacher Panel
         </p>
-        <h1 className="card-title mt-1 text-3xl">Gerenciamento</h1>
-        <p className="mt-1 text-sm muted">Bem-vindo, {user.fullName}.</p>
+        <h1 className="card-title mt-1 text-3xl">Management</h1>
+        <p className="mt-1 text-sm muted">Welcome, {user.fullName}.</p>
       </header>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
@@ -516,9 +516,9 @@ export default function TeacherPage() {
       ) : null}
 
       <section className="surface p-5 md:p-6">
-        <h2 className="card-title text-2xl">Usuários</h2>
+        <h2 className="card-title text-2xl">Users</h2>
         <p className="mt-1 text-sm muted">
-          Promova alunos para professor e remova usuários quando necessário.
+          Promote students to teachers and remove users when needed.
         </p>
 
         <div className="mt-4 grid gap-2">
@@ -538,21 +538,21 @@ export default function TeacherPage() {
                   </p>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex w-full flex-wrap gap-2 sm:w-auto">
                   <button
-                    className="btn btn-ghost"
+                    className="btn btn-ghost w-full sm:w-auto"
                     type="button"
                     onClick={() => updateUserRole(item)}
                   >
-                    {item.role === 'teacher' ? 'Rebaixar' : 'Promover'}
+                    {item.role === 'teacher' ? 'Demote' : 'Promote'}
                   </button>
                   <button
-                    className="btn btn-ghost"
+                    className="btn btn-ghost w-full sm:w-auto"
                     type="button"
                     onClick={() => deleteUser(item)}
                     disabled={item.id === user.id}
                   >
-                    Excluir
+                    Delete
                   </button>
                 </div>
               </div>
@@ -563,36 +563,36 @@ export default function TeacherPage() {
 
       <div className="grid gap-5 lg:grid-cols-[0.92fr_1.08fr]">
         <section className="surface p-5 md:p-6">
-          <h2 className="card-title text-2xl">Matérias</h2>
+          <h2 className="card-title text-2xl">Subjects</h2>
           <form onSubmit={createSubject} className="mt-4 space-y-3">
             <div>
-              <label className="field-label">Nome da matéria</label>
+              <label className="field-label">Subject name</label>
               <input
                 className="field"
-                placeholder="Ex: Geografia"
+                placeholder="Example: Geography"
                 value={subjectName}
                 onChange={e => setSubjectName(e.target.value)}
                 required
               />
             </div>
             <div>
-              <label className="field-label">Descrição</label>
+              <label className="field-label">Description</label>
               <textarea
                 className="textarea"
-                placeholder="Descrição breve"
+                placeholder="Short description"
                 value={subjectDescription}
                 onChange={e => setSubjectDescription(e.target.value)}
               />
             </div>
             <button className="btn btn-primary" type="submit">
-              Criar matéria
+              Create subject
             </button>
           </form>
 
           <div className="mt-5 space-y-2">
-            <h3 className="text-sm font-semibold text-[#2F2925]">Editar</h3>
+            <h3 className="text-sm font-semibold text-[#2F2925]">Edit</h3>
             {subjects.length === 0 ? (
-              <p className="text-xs muted">Nenhuma matéria cadastrada.</p>
+              <p className="text-xs muted">No subjects available yet.</p>
             ) : (
               <ul className="space-y-2">
                 {subjects.map(subject => (
@@ -626,14 +626,14 @@ export default function TeacherPage() {
                         className="btn btn-ghost"
                         onClick={() => updateSubject(subject)}
                       >
-                        Salvar
+                        Save
                       </button>
                       <button
                         type="button"
                         className="btn btn-ghost"
                         onClick={() => removeSubject(subject)}
                       >
-                        Excluir
+                        Delete
                       </button>
                     </div>
                   </li>
@@ -644,20 +644,20 @@ export default function TeacherPage() {
         </section>
 
         <section className="surface p-5 md:p-6">
-          <h2 className="card-title text-2xl">Questões</h2>
+          <h2 className="card-title text-2xl">Questions</h2>
           <form
             onSubmit={createQuestionWithAlternatives}
             className="mt-4 space-y-3.5"
           >
             <div>
-              <label className="field-label">Matéria</label>
+              <label className="field-label">Subject</label>
               <select
                 className="select"
                 value={questionSubjectId}
                 onChange={e => setQuestionSubjectId(e.target.value)}
                 required
               >
-                <option value="">Selecione</option>
+                <option value="">Select</option>
                 {subjects.map(subject => (
                   <option key={subject.id} value={subject.id}>
                     {subject.name}
@@ -667,10 +667,10 @@ export default function TeacherPage() {
             </div>
 
             <div>
-              <label className="field-label">Enunciado</label>
+              <label className="field-label">Statement</label>
               <textarea
                 className="textarea"
-                placeholder="Digite o enunciado"
+                placeholder="Type the full question statement"
                 value={questionStatement}
                 onChange={e => setQuestionStatement(e.target.value)}
                 required
@@ -678,7 +678,7 @@ export default function TeacherPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="field-label">Alternativas</label>
+              <label className="field-label">Alternatives</label>
               {alternatives.map(item => (
                 <div key={item.label} className="flex items-center gap-2">
                   <span className="w-6 rounded-md bg-[#FFF0E6] py-1 text-center text-xs font-bold text-[#C67A52]">
@@ -686,7 +686,7 @@ export default function TeacherPage() {
                   </span>
                   <input
                     className="field"
-                    placeholder={`Alternativa ${item.label}`}
+                    placeholder={`Alternative ${item.label}`}
                     value={item.content}
                     onChange={e =>
                       updateAlternative(item.label, e.target.value)
@@ -697,7 +697,7 @@ export default function TeacherPage() {
             </div>
 
             <div>
-              <label className="field-label">Alternativa correta</label>
+              <label className="field-label">Correct alternative</label>
               <select
                 className="select"
                 value={correctLabel}
@@ -712,13 +712,13 @@ export default function TeacherPage() {
             </div>
 
             <button className="btn btn-primary" type="submit">
-              Publicar questão
+              Publish question
             </button>
           </form>
 
           <div className="mt-5 space-y-2">
             <h3 className="text-sm font-semibold text-[#2F2925]">
-              Editar e excluir
+              Edit and delete
             </h3>
 
             <select
@@ -726,7 +726,7 @@ export default function TeacherPage() {
               value={manageSubjectId}
               onChange={e => setManageSubjectId(e.target.value)}
             >
-              <option value="">Selecione uma matéria</option>
+              <option value="">Select a subject</option>
               {subjects.map(subject => (
                 <option key={subject.id} value={subject.id}>
                   {subject.name}
@@ -735,7 +735,9 @@ export default function TeacherPage() {
             </select>
 
             {questions.length === 0 ? (
-              <p className="text-xs muted">Sem questões para esta matéria.</p>
+              <p className="text-xs muted">
+                No questions for this subject yet.
+              </p>
             ) : (
               <ul className="space-y-2">
                 {questions.map(question => (
@@ -756,14 +758,14 @@ export default function TeacherPage() {
                         className="btn btn-ghost"
                         onClick={() => updateQuestion(question)}
                       >
-                        Salvar
+                        Save
                       </button>
                       <button
                         type="button"
                         className="btn btn-ghost"
                         onClick={() => removeQuestion(question)}
                       >
-                        Excluir
+                        Delete
                       </button>
                     </div>
                   </li>
